@@ -4,6 +4,74 @@
 #include <vector>
 #include <string>
 
+// Vertex Shader source code
+const char* vertexShaderSource = R"(
+#version 310 es
+#extension GL_EXT_clip_cull_distance : require
+
+layout(location = 0) in vec3 aPos;
+
+out float gl_ClipDistance[1];
+
+void main()
+{
+    gl_Position = vec4(aPos, 1.0);
+
+    // Define clip distances for demonstration
+    gl_ClipDistance[0] = aPos.x + 0.5;
+
+}
+)";
+
+// Fragment Shader source code
+const char* fragmentShaderSource = R"(
+#version 310 es
+
+out vec4 FragColor;
+
+void main()
+{
+    FragColor = vec4(1.0, 0.0, 0.0, 1.0); // Red color
+}
+)";
+
+// Function to compile a shader
+GLuint compileShader(const char* shaderSource, GLenum shaderType) {
+    GLuint shader = glCreateShader(shaderType);
+    glShaderSource(shader, 1, &shaderSource, nullptr);
+    glCompileShader(shader);
+
+    int success;
+    char infoLog[512];
+    glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
+    if (!success) {
+        glGetShaderInfoLog(shader, 512, nullptr, infoLog);
+        std::cerr << "ERROR::SHADER::COMPILATION_FAILED\n" << infoLog << std::endl;
+    }
+    return shader;
+}
+
+// Function to create a shader program
+GLuint createShaderProgram(const char* vertexSource, const char* fragmentSource) {
+    GLuint vertexShader = compileShader(vertexSource, GL_VERTEX_SHADER);
+    GLuint fragmentShader = compileShader(fragmentSource, GL_FRAGMENT_SHADER);
+    GLuint shaderProgram = glCreateProgram();
+    glAttachShader(shaderProgram, vertexShader);
+    glAttachShader(shaderProgram, fragmentShader);
+    glLinkProgram(shaderProgram);
+
+    int success;
+    char infoLog[512];
+    glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
+    if (!success) {
+        glGetProgramInfoLog(shaderProgram, 512, nullptr, infoLog);
+        std::cerr << "ERROR::PROGRAM::LINKING_FAILED\n" << infoLog << std::endl;
+    }
+    glDeleteShader(vertexShader);
+    glDeleteShader(fragmentShader);
+    return shaderProgram;
+}
+
 // Callback function for window resizing
 void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
     glViewport(0, 0, width, height);
@@ -79,6 +147,9 @@ int main() {
 
     // Set the viewport
     glViewport(0, 0, 800, 600);
+
+    // Compile and link shaders
+    GLuint shaderProgram = createShaderProgram(vertexShaderSource, fragmentShaderSource);
 
     // Set the callback function for window resizing
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
