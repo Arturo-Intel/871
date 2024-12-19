@@ -68,28 +68,6 @@ int main() {
         return -1;
     }
 
-    // Get the number of extensions
-    GLint numExtensions = 0;
-    glGetIntegerv(GL_NUM_EXTENSIONS, &numExtensions);
-
-    if (numExtensions > 0) {
-        std::vector<std::string> extensions;
-
-        // Get extensions one by one
-        for (GLint i = 0; i < numExtensions; i++) {
-            const GLubyte* extension = glGetStringi(GL_EXTENSIONS, i);
-            extensions.push_back(reinterpret_cast<const char*>(extension));
-        }
-
-        // Print all extensions
-        for (const auto& ext : extensions) {
-            std::cout << ext << std::endl;
-        }
-    }
-    else {
-        std::cout << "No extensions found." << std::endl;
-    }
-
     // Check if GL_EXT_clip_cull_distance is supported 
     if (isExtensionSupported("GL_EXT_clip_cull_distance")) 
     { 
